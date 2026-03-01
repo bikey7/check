@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Add Restaurant";
+}
+<div class="container mt-5">
+    <h2>Add Restaurant</h2>
+    <form method="post" asp-action="AddRestaurant">
+        <div class="mb-3">
+            <label>Name</label>
+            <input type="text" class="form-control" name="name" required />
+        </div>
+        <div class="mb-3">
+            <label>Location</label>
+            <input type="text" class="form-control" name="location" required />
+        </div>
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea class="form-control" name="description"></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">Add</button>
+    </form>
+</div>

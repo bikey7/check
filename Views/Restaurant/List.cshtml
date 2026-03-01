@@ -1,0 +1,26 @@
+@model IEnumerable<restaurantfinalupdated.Models.Restaurant>
+
+@{
+    ViewData["Title"] = "Restaurants";
+}
+
+<h2>Restaurants</h2>
+
+<form method="get" class="mb-3">
+    <input type="text" name="search" placeholder="Search by city" class="form-control" />
+</form>
+
+<div class="row">
+    @foreach (var r in Model)
+    {
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">@r.Name</h5>
+                    <p class="card-text">@r.City</p>
+                    <a href="/Review/Submit?restaurantId=@r.Id" class="btn btn-primary">Leave Review</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

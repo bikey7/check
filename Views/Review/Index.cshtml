@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<h2>Reviews</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Restaurant</th>
+            <th>User</th>
+            <th>Rating</th>
+            <th>Comment</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var review in ViewBag.Reviews as List<Review>)
+        {
+            <tr>
+                <td>@review.Restaurant.Name</td>
+                <td>@review.UserEmail</td>
+                <td>@review.Rating</td>
+                <td>@review.Comment</td>
+            </tr>
+        }
+    </tbody>
+</table>

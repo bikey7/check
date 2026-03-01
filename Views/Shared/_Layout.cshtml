@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RestaurantApp</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="/">Home</a> |
+            <a href="/Account/Login">Login</a> |
+            <a href="/Account/Register">Register</a> |
+            <a href="/Restaurant/Index">Restaurants</a> |
+            <a href="/Review/Index">Reviews</a>
+        </nav>
+
+        <h2>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <text>Welcome, @User.Identity.Name!</text>
+            }
+            else
+            {
+                <text>Welcome, Guest!</text>
+            }
+        </h2>
+    </header>
+
+    <main role="main" class="container">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <p>&copy; 2026 - RestaurantApp</p>
+    </footer>
+</body>
+
+</html>

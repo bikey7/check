@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Restaurants";
+}
+
+<h2>Restaurants</h2>
+
+<p>
+    <a href="/Restaurant/Create">Register New Restaurant</a>
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>City</th>
+            <th>Owner</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* Loop through restaurants from the controller *@
+        @foreach (var r in ViewBag.Restaurants as List<Restaurant>)
+        {
+            <tr>
+                <td>@r.Name</td>
+                <td>@r.City</td>
+                <td>@r.OwnerEmail</td>
+            </tr>
+        }
+    </tbody>
+</table>
