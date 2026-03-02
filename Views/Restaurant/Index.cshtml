@@ -1,30 +1,79 @@
+@model IEnumerable<restaurantfinalupdated.Models.Restaurant>
+
 @{
     ViewData["Title"] = "Restaurants";
 }
 
-<h2>Restaurants</h2>
+<h1>Restaurants</h1>
 
-<p>
-    <a href="/Restaurant/Create">Register New Restaurant</a>
-</p>
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form asp-action="Index" method="get" class="d-flex">
+            <input type="text" name="searchString" class="form-control me-2" placeholder="Search restaurants..."
+                   value="@ViewBag.CurrentSearch" />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    <div class="col-md-6 text-end">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Filter @(ViewBag.CurrentCuisine != null ? $"- {ViewBag.CurrentCuisine}" : "")
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" asp-action="Index">All Cuisines</a></li>
+                @foreach (var cuisine in ViewBag.Cuisines)
+                {
+                    <li><a class="dropdown-item" asp-action="Index" asp-route-cuisine="@cuisine">@cuisine</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>City</th>
-            <th>Owner</th>
-        </tr>
-    </thead>
-    <tbody>
-        @* Loop through restaurants from the controller *@
-        @foreach (var r in ViewBag.Restaurants as List<Restaurant>)
-        {
-            <tr>
-                <td>@r.Name</td>
-                <td>@r.City</td>
-                <td>@r.OwnerEmail</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<!-- Restaurant Grid -->
+<div class="row">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="alert alert-info">No restaurants found. <a asp-action="Index">Clear filters</a></div>
+        </div>
+    }
+
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 restaurant-card">
+                <div class="card-body">
+                    <h5 class="card-title">@item.Name</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@item.CuisineType</h6>
+                    <p class="card-text"><i class="bi bi-geo-alt"></i> @item.Location</p>
+
+                    @if (item.Reviews != null && item.Reviews.Any())
+                    {
+                        <div class="mb-2">
+                            @{
+                                var avgRating = item.Reviews.Average(r => r.Rating);
+                            }
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Round(avgRating))
+                                {
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star text-warning"></i>
+                                }
+                            }
+                            <span class="ms-2">(@item.Reviews.Count reviews)</span>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

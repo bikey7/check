@@ -1,6 +1,88 @@
-﻿@{
-    ViewData["Title"] = "Home";
+﻿@model IEnumerable<restaurantfinalupdated.Models.Restaurant>
+
+@{
+    ViewData["Title"] = "Home Page";
 }
 
-<h1>Welcome to RestaurantApp!</h1>
-<p>Explore restaurants and leave your reviews.</p>
+<div class="text-center">
+    <h1 class="display-4">Welcome to Restaurant App</h1>
+    <p class="lead">Discover the best restaurants in your area</p>
+    <a asp-controller="Restaurant" asp-action="Index" class="btn btn-primary btn-lg mt-3">Browse Restaurants</a>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <h2 class="mt-5 mb-4">Recently Added Restaurants</h2>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 restaurant-card">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@(item.CuisineType ?? "Various")</h6>
+                        <!-- Changed from Cuisine to CuisineType -->
+                        <p class="card-text">
+                            <i class="bi bi-geo-alt"></i> @(item.City ?? "Unknown City")<br />
+                        </p>
+
+                        @if (item.Reviews != null && item.Reviews.Any())
+                        {
+                            <div class="mb-2">
+                                @{
+                                    var avgRating = item.Reviews.Average(r => r.Rating);
+                                }
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= Math.Round(avgRating))
+                                    {
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star text-warning"></i>
+                                    }
+                                }
+                                <span class="ms-2">(@item.Reviews.Count reviews)</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No reviews yet</p>
+                        }
+
+                        <p class="card-text">@(item.Description?.Length > 100 ? item.Description.Substring(0, 100) + "..." :
+                                                item.Description ?? "No description available")</p>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0">
+                            <a asp-controller="Restaurant" asp-action="Details" asp-route-id="@item.Id"
+                               class="btn btn-primary w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+else
+    {
+        <div class="alert alert-info mt-5">
+            No restaurants available yet. Check back later!
+        </div>
+    }
+
+    @section Styles {
+        <style>
+                .restaurant-card {
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    border: none;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                .restaurant-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                }
+        </style>
+    }

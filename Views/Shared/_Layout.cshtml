@@ -1,41 +1,120 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RestaurantApp</title>
-    <link rel="stylesheet" href="~/css/site.css" />
+    <title>@ViewData["Title"] - Restaurant App</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
     <header>
-        <nav>
-            <a href="/">Home</a> |
-            <a href="/Account/Login">Login</a> |
-            <a href="/Account/Register">Register</a> |
-            <a href="/Restaurant/Index">Restaurants</a> |
-            <a href="/Review/Index">Reviews</a>
-        </nav>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Restaurant App</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Restaurant" asp-action="Index">Restaurants</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="About">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Contact">Contact</a>
+                        </li>
 
-        <h2>
-            @if (User.Identity.IsAuthenticated)
-            {
-                <text>Welcome, @User.Identity.Name!</text>
-            }
-            else
-            {
-                <text>Welcome, Guest!</text>
-            }
-        </h2>
-    </header>
+                        @{
+                            var userRole = Context.Session.GetString("UserRole");
+                            var userId = Context.Session.GetString("UserId");
+                        }
 
-    <main role="main" class="container">
-        @RenderBody()
-    </main>
+                        @if (!string.IsNullOrEmpty(userId) && userRole == "Owner")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Restaurant" asp-action="MyRestaurants">My
+                                    Restaurants</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Restaurant" asp-action="Create">Add
+                                        Restaurant</a>
+                                    </li>
+                                }
 
-    <footer>
-        <p>&copy; 2026 - RestaurantApp</p>
-    </footer>
-</body>
+                                @if (!string.IsNullOrEmpty(userId) && userRole == "Admin")
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Pending
+                                            Approvals</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">Manage Users</a>
+                                        </li>
+                                    }
+                                </ul>
 
-</html>
+                                <ul class="navbar-nav">
+                                    @if (!string.IsNullOrEmpty(userId))
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Profile">
+                                                <i class="bi bi-person-circle"></i> @Context.Session.GetString("UserName")
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </header>
+
+                <div class="container">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Message"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
+                </div>
+
+                <footer class="border-top footer text-muted">
+                    <div class="container">
+                        &copy; 2026 - Restaurant App - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </div>
+                </footer>
+
+                <script src="~/lib/jquery/dist/jquery.min.js"></script>
+                <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+                <script src="~/js/site.js" asp-append-version="true"></script>
+                @await RenderSectionAsync("Scripts", required: false)
+            </body>
+
+        </html>

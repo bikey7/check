@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using restaurantfinalupdated.Data;
 using restaurantfinalupdated.Models;
 
@@ -17,66 +14,105 @@ namespace restaurantfinalupdated.Controllers
             _context = context;
         }
 
-        // GET: /Account/Register
-        public IActionResult Register() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> Register(string name, string email, string password)
+        // GET: Account/Register
+        public IActionResult Register()
         {
-            if (await _context.Users.AnyAsync(u => u.Email == email))
+            return View();
+        }
+
+        // POST: Account/Register
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(User user)
+        {
+            if (ModelState.IsValid)
             {
-                TempData["Error"] = "Email already exists!";
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == user.Email);
+
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Email", "Email already registered");
+                    return View(user);
+                }
+
+                user.RegistrationDate = DateTime.Now;
+                user.Role = "Customer";
+                user.IsActive = true;
+
+                _context.Add(user);
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.SetString("UserId", user.Id.ToString());
+                HttpContext.Session.SetString("UserName", user.Name);
+                HttpContext.Session.SetString("UserRole", user.Role);
+
+                return RedirectToAction("Index", "Home");
+            }
+            return View(user);
+        }
+
+        // GET: Account/Login
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Account/Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string email, string password)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                ViewBag.Error = "Email and password are required";
                 return View();
             }
 
-            var user = new User
-            {
-                Name = name,
-                Email = email,
-                Password = password, // Note: For production, hash this
-                Role = UserRole.User
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Registration successful! Please login.";
-            return RedirectToAction("Login");
-        }
-
-        // GET: /Account/Login
-        public IActionResult Login() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> Login(string email, string password)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password && u.IsActive);
 
             if (user == null)
             {
-                TempData["Error"] = "Invalid credentials!";
+                ViewBag.Error = "Invalid email or password";
                 return View();
             }
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            HttpContext.Session.SetString("UserId", user.Id.ToString());
+            HttpContext.Session.SetString("UserName", user.Name);
+            HttpContext.Session.SetString("UserRole", user.Role);
 
             return RedirectToAction("Index", "Home");
         }
 
-        public async Task<IActionResult> Logout()
+        // GET: Account/Logout
+        public IActionResult Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login");
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Account/Profile
+        public async Task<IActionResult> Profile()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _context.Users
+                .Include(u => u.OwnedRestaurants)
+                .Include(u => u.Reviews)
+                .ThenInclude(r => r.Restaurant)
+                .FirstOrDefaultAsync(u => u.Id == int.Parse(userId));
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
         }
     }
 }

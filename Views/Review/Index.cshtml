@@ -1,27 +1,60 @@
+@model IEnumerable<restaurantfinalupdated.Models.Review>
+
 @{
     ViewData["Title"] = "Reviews";
 }
 
-<h2>Reviews</h2>
+<h1>All Reviews</h1>
 
-<table>
-    <thead>
-        <tr>
-            <th>Restaurant</th>
-            <th>User</th>
-            <th>Rating</th>
-            <th>Comment</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var review in ViewBag.Reviews as List<Review>)
-        {
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No reviews yet.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@review.Restaurant.Name</td>
-                <td>@review.UserEmail</td>
-                <td>@review.Rating</td>
-                <td>@review.Comment</td>
+                <th>Restaurant</th>
+                <th>User</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Date</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Restaurant?.Name</td>
+                    <td>@item.User?.Name</td>
+                    <td>
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= item.Rating)
+                            {
+                                <i class="bi bi-star-fill text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star text-warning"></i>
+                            }
+                        }
+                    </td>
+                    <td>@(item.Comment?.Length > 50 ? item.Comment.Substring(0, 50) + "..." : item.Comment)</td>
+                    <td>@item.Date.ToShortDateString()</td>
+                    <td>
+                        @if (Context.Session.GetString("UserId") == item.UserId.ToString())
+                        {
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Delete this review?')">Delete</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

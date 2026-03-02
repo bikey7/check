@@ -1,3 +1,74 @@
-<h2>User Dashboard</h2>
-<p>Welcome, @User.Identity.Name!</p>
-<a asp-controller="Account" asp-action="Logout">Logout</a>
+@model IEnumerable<restaurantfinalupdated.Models.Restaurant>
+
+@{
+    ViewData["Title"] = "Owner Dashboard";
+
+    // Fix null reference warning
+    var restaurants = Model ?? Enumerable.Empty<restaurantfinalupdated.Models.Restaurant>();
+}
+
+<h1>Owner Dashboard</h1>
+
+@if (!restaurants.Any())
+{
+    <div class="alert alert-info">
+        You haven't registered any restaurants yet.
+        <a asp-controller="Restaurant" asp-action="Create" class="alert-link">Create your first restaurant</a>
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Cuisine</th>
+                <th>City</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in restaurants)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@(item.CuisineType ?? "Various")</td> <!-- Changed from Cuisine to CuisineType -->
+                    <td>@(item.City ?? "Unknown")</td>
+                    <td>
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(item.Rating))
+                            {
+                                <i class="bi bi-star-fill text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star text-warning"></i>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsApproved)
+                        {
+                            <span class="badge bg-success">Approved</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">Pending</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-controller="Restaurant" asp-action="Edit" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-primary">Edit</a>
+                        <a asp-controller="Restaurant" asp-action="Details" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-info">Details</a>
+                        <a asp-controller="Restaurant" asp-action="Delete" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

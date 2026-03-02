@@ -1,3 +1,48 @@
-<h2>Admin Dashboard</h2>
-<p>Welcome, @User.Identity.Name!</p>
-<a asp-controller="Account" asp-action="Logout">Logout</a>
+@model IEnumerable<restaurantfinalupdated.Models.Restaurant>
+
+@{
+    ViewData["Title"] = "Pending Approvals";
+}
+
+<h1>Pending Restaurant Approvals</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-success">No pending approvals!</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Cuisine</th>
+                <th>Location</th>
+                <th>Owner</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.CuisineType</td>
+                    <td>@item.Location</td>
+                    <td>@item.Owner?.Name</td>
+                    <td>@item.CreatedDate.ToShortDateString()</td>
+                    <td>
+                        <form asp-action="ApproveRestaurant" asp-route-id="@item.Id" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        <form asp-action="RejectRestaurant" asp-route-id="@item.Id" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Reject?')">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -4,23 +4,115 @@
     ViewData["Title"] = "Restaurants";
 }
 
-<h2>Restaurants</h2>
+<h1>Restaurants</h1>
 
-<form method="get" class="mb-3">
-    <input type="text" name="search" placeholder="Search by city" class="form-control" />
-</form>
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form asp-action="List" method="get" class="d-flex">
+            <input type="text" name="searchString" class="form-control me-2" placeholder="Search restaurants..."
+                   value="@ViewBag.CurrentSearch" />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    <div class="col-md-6 text-end">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Filter by Cuisine @(ViewBag.CurrentCuisine != null ? $"- {ViewBag.CurrentCuisine}" : "")
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" asp-action="List">All Cuisines</a></li>
+                @if (ViewBag.Cuisines != null)
+                {
+                    @foreach (var cuisine in ViewBag.Cuisines)
+                    {
+                        <li><a class="dropdown-item" asp-action="List" asp-route-cuisine="@cuisine">@cuisine</a></li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</div>
 
+<!-- Restaurant Grid -->
 <div class="row">
-    @foreach (var r in Model)
+    @if (!Model.Any())
     {
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">@r.Name</h5>
-                    <p class="card-text">@r.City</p>
-                    <a href="/Review/Submit?restaurantId=@r.Id" class="btn btn-primary">Leave Review</a>
-                </div>
+        <div class="col-12">
+            <div class="alert alert-info">
+                No restaurants found.
+                <a asp-action="List" class="alert-link">Clear filters</a>
             </div>
         </div>
     }
-</div>
+
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 restaurant-card">
+                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                {
+                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                }
+                else
+                {
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
+                         style="height: 200px;">
+                        <span class="text-white">No Image</span>
+                    </div>
+                }
+
+                <div class="card-body">
+                    <h5 class="card-title">@item.Name</h5>
+                    <p class="card-text text-muted">
+                        <i class="bi bi-geo-alt"></i> @(item.City ?? "Unknown City")<br />
+                        <i class="bi bi-tag"></i> @(item.CuisineType ?? "Various")
+                        <!-- Changed from Cuisine to CuisineType -->
+                    </p>
+
+                    <div class="mb-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(item.Rating))
+                            {
+                                <i class="bi bi-star-fill text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star text-warning"></i>
+                            }
+                        }
+                        <span class="ms-2">(@(item.Reviews?.Count ?? 0) reviews)</span>
+                    </div>
+
+                    <p class="card-text">@(item.Description?.Length > 100 ? item.Description.Substring(0, 100) + "..." :
+                                            item.Description ?? "No description available")</p>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-0">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @section Styles {
+        <style>
+                .restaurant-card {
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    border: none;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                .restaurant-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                }
+
+                .restaurant-card .card-footer {
+                    background-color: transparent;
+                    padding-bottom: 1.5rem;
+                }
+        </style>
+    }

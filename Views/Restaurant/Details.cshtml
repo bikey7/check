@@ -1,0 +1,126 @@
+@model restaurantfinalupdated.Models.Restaurant
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h1>@Model.Name</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">@Model.Name</h5>
+                <h6 class="card-subtitle mb-2 text-muted">@Model.CuisineType</h6>
+
+                <div class="mb-3">
+                    @if (Model.Reviews != null && Model.Reviews.Any())
+                    {
+                        var avgRating = Model.Reviews.Average(r => r.Rating);
+                        for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(avgRating))
+                            {
+                                <i class="bi bi-star-fill text-warning fs-4"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star text-warning fs-4"></i>
+                            }
+                        }
+                        <span class="ms-2 fs-5">(@Model.Reviews.Count reviews)</span>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No reviews yet</p>
+                    }
+                </div>
+
+                <p class="card-text">@Model.Description</p>
+
+                <hr />
+
+                <p><i class="bi bi-geo-alt-fill"></i> <strong>Location:</strong> @Model.Location</p>
+                <p><i class="bi bi-person-fill"></i> <strong>Owner:</strong> @Model.Owner?.Name</p>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Reviews</h4>
+
+                @if (!string.IsNullOrEmpty(Context.Session.GetString("UserId")))
+                {
+                    <a asp-controller="Review" asp-action="Create" asp-route-restaurantId="@Model.Id"
+                       class="btn btn-primary">Write a Review</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Login to Review</a>
+                }
+            </div>
+            <div class="card-body">
+                @if (Model.Reviews != null && Model.Reviews.Any())
+                {
+                    @foreach (var review in Model.Reviews.OrderByDescending(r => r.Date))
+                    {
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <h5>@review.User?.Name</h5>
+                                <small class="text-muted">@review.Date.ToShortDateString()</small>
+                            </div>
+                            <div class="mb-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.Rating)
+                                    {
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star text-warning"></i>
+                                    }
+                                }
+                            </div>
+                            <p>@review.Comment</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">No reviews yet. Be the first to review!</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Info</h5>
+                <p><strong>Cuisine:</strong> @Model.CuisineType</p>
+                <p><strong>Location:</strong> @Model.Location</p>
+            </div>
+        </div>
+
+        @if (Context.Session.GetString("UserId") == Model.OwnerId.ToString())
+        {
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Management</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <a asp-action="Index" class="btn btn-outline-secondary w-100">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>

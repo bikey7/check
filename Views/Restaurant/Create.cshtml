@@ -1,17 +1,71 @@
+@model restaurantfinalupdated.Models.Restaurant
+
 @{
     ViewData["Title"] = "Register Restaurant";
 }
 
-<h2>Register Restaurant</h2>
+<h1>Register New Restaurant</h1>
 
-<form method="post" asp-controller="Restaurant" asp-action="Create">
-    <div>
-        <label>Name:</label>
-        <input type="text" name="Name" required />
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Location" class="control-label"></label>
+                        <input asp-for="Location" class="form-control" />
+                        <span asp-validation-for="Location" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="CuisineType" class="control-label"></label>
+                        <select asp-for="CuisineType" class="form-control">
+                            <option value="">Select Cuisine Type</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Mexican">Mexican</option>
+                            <option value="Indian">Indian</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="American">American</option>
+                        </select>
+                        <span asp-validation-for="CuisineType" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="submit" value="Create" class="btn btn-primary" />
+                        <a asp-action="MyRestaurants" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div>
-        <label>City:</label>
-        <input type="text" name="City" required />
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Note</h5>
+                <p>Your restaurant will be reviewed by an admin before appearing publicly.</p>
+            </div>
+        </div>
     </div>
-    <button type="submit">Register</button>
-</form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
